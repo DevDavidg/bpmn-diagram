@@ -415,8 +415,8 @@ interface TaskTag {
 
       :host ::ng-deep .tooltip-close-btn {
         position: absolute;
-        right: 10px;
-        top: 10px;
+        right: 0px;
+        top: 0px;
         background: rgba(0, 0, 0, 0.05);
         border: none;
         font-size: 18px;
@@ -496,12 +496,12 @@ interface TaskTag {
       :host ::ng-deep .tooltip-info:nth-child(even):hover {
         background-color: #e8f0ff;
       }
-      :host ::ng-deep .djs-element.selected .djs-visual > :nth-child(1) {
+      :host ::ng-deep .djs-element.selected .djs-visual > :not(text) {
         stroke: #1a73e8 !important;
         stroke-width: 2px !important;
       }
 
-      :host ::ng-deep .djs-element:hover .djs-visual > :nth-child(1) {
+      :host ::ng-deep .djs-element:hover .djs-visual > :not(text) {
         stroke: #2196f3 !important;
         stroke-width: 2px !important;
         cursor: pointer !important;
@@ -630,7 +630,7 @@ export class BpmnViewerCustomComponent
         if (this.isCanvasDragging) return;
 
         const element = event.element;
-        if (element && element.type && element.type.includes('Task')) {
+        if (element?.type?.includes('Task')) {
           this.showTooltip(event.originalEvent, element.id);
         } else if (
           !this.tooltipElement ||
@@ -711,7 +711,7 @@ export class BpmnViewerCustomComponent
     const closeButton = document.createElement('button');
     closeButton.className = 'tooltip-close-btn';
     closeButton.innerHTML = '&times;';
-    closeButton.style.right = '10px';
+    closeButton.style.right = '0';
     closeButton.style.left = 'auto';
     closeButton.onclick = (e) => {
       e.stopPropagation();
@@ -830,81 +830,114 @@ export class BpmnViewerCustomComponent
   private adjustTooltipPosition(): void {
     if (!this.tooltipElement) return;
 
-    const tooltipRect = this.tooltipElement.getBoundingClientRect();
+    const tooltipEl = this.tooltipElement;
+    const tooltipRect = tooltipEl.getBoundingClientRect();
     const containerRect =
       this.bpmnContainer.nativeElement.getBoundingClientRect();
     const margin = 15;
+    const relativeLeft = parseFloat(tooltipEl.style.left || '0');
+    const relativeTop = parseFloat(tooltipEl.style.top || '0');
 
-    const relativeLeft = parseFloat(this.tooltipElement.style.left || '0');
-    const relativeTop = parseFloat(this.tooltipElement.style.top || '0');
-
-    if (tooltipRect.right > containerRect.right - margin) {
-      const overflowX = tooltipRect.right - containerRect.right + margin;
-      this.tooltipElement.style.left = `${relativeLeft - overflowX}px`;
-    } else if (tooltipRect.left < containerRect.left + margin) {
-      this.tooltipElement.style.left = `${margin}px`;
-    }
-
-    if (tooltipRect.bottom > containerRect.bottom - margin) {
-      if (this.activeTaskId) {
-        const element = this.elementRegistry.get(this.activeTaskId);
-        if (element) {
-          const position = this.canvas.getAbsoluteBBox(element);
-          this.tooltipElement.style.top = `${
-            position.y - tooltipRect.height - 10
-          }px`;
-        } else {
-          this.tooltipElement.style.top = `${
-            relativeTop - (tooltipRect.bottom - containerRect.bottom + margin)
-          }px`;
-        }
-      }
-    } else if (tooltipRect.top < containerRect.top + margin) {
-      if (this.activeTaskId) {
-        const element = this.elementRegistry.get(this.activeTaskId);
-        if (element) {
-          const position = this.canvas.getAbsoluteBBox(element);
-          this.tooltipElement.style.top = `${
-            position.y + position.height + 10
-          }px`;
-        } else {
-          this.tooltipElement.style.top = `${margin}px`;
-        }
-      }
-    }
+    this.adjustHorizontalPosition(
+      tooltipEl,
+      tooltipRect,
+      containerRect,
+      margin,
+      relativeLeft
+    );
 
     if (this.activeTaskId) {
       const element = this.elementRegistry.get(this.activeTaskId);
-      if (element) {
-        const position = this.canvas.getAbsoluteBBox(element);
-        const taskCenterX = position.x + position.width / 2;
-        const taskTop = position.y;
-        const taskBottom = position.y + position.height;
-
-        const tooltipBottom =
-          parseFloat(this.tooltipElement.style.top) + tooltipRect.height;
-
-        if (tooltipBottom <= taskTop + 5) {
-          this.tooltipElement.style.setProperty('--arrow-position', 'bottom');
-          this.tooltipElement.style.setProperty(
-            '--arrow-offset',
-            `${taskCenterX - parseFloat(this.tooltipElement.style.left)}px`
-          );
-        } else if (
-          parseFloat(this.tooltipElement.style.top) >=
-          taskBottom - 5
-        ) {
-          this.tooltipElement.style.setProperty('--arrow-position', 'top');
-          this.tooltipElement.style.setProperty(
-            '--arrow-offset',
-            `${taskCenterX - parseFloat(this.tooltipElement.style.left)}px`
-          );
-        }
+      const activePosition = element
+        ? this.canvas.getAbsoluteBBox(element)
+        : null;
+      this.adjustVerticalPosition(
+        tooltipEl,
+        tooltipRect,
+        containerRect,
+        margin,
+        relativeTop,
+        activePosition
+      );
+      if (activePosition) {
+        this.adjustArrowPosition(tooltipEl, tooltipRect, activePosition);
       }
     }
 
-    this.tooltipElement.style.filter =
-      'drop-shadow(0 10px 16px rgba(0,0,0,0.2))';
+    tooltipEl.style.filter = 'drop-shadow(0 10px 16px rgba(0,0,0,0.2))';
+  }
+
+  private adjustHorizontalPosition(
+    tooltipEl: HTMLElement,
+    tooltipRect: DOMRect,
+    containerRect: DOMRect,
+    margin: number,
+    relativeLeft: number
+  ): void {
+    if (tooltipRect.right > containerRect.right - margin) {
+      const overflowX = tooltipRect.right - containerRect.right + margin;
+      tooltipEl.style.left = `${relativeLeft - overflowX}px`;
+    } else if (tooltipRect.left < containerRect.left + margin) {
+      tooltipEl.style.left = `${margin}px`;
+    }
+  }
+
+  private adjustVerticalPosition(
+    tooltipEl: HTMLElement,
+    tooltipRect: DOMRect,
+    containerRect: DOMRect,
+    margin: number,
+    relativeTop: number,
+    activePosition: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    } | null
+  ): void {
+    if (tooltipRect.bottom > containerRect.bottom - margin) {
+      if (activePosition) {
+        tooltipEl.style.top = `${activePosition.y - tooltipRect.height - 10}px`;
+      } else {
+        tooltipEl.style.top = `${
+          relativeTop - (tooltipRect.bottom - containerRect.bottom + margin)
+        }px`;
+      }
+    } else if (tooltipRect.top < containerRect.top + margin) {
+      if (activePosition) {
+        tooltipEl.style.top = `${
+          activePosition.y + activePosition.height + 10
+        }px`;
+      } else {
+        tooltipEl.style.top = `${margin}px`;
+      }
+    }
+  }
+
+  private adjustArrowPosition(
+    tooltipEl: HTMLElement,
+    tooltipRect: DOMRect,
+    activePosition: { x: number; y: number; width: number; height: number }
+  ): void {
+    const taskCenterX = activePosition.x + activePosition.width / 2;
+    const taskTop = activePosition.y;
+    const taskBottom = activePosition.y + activePosition.height;
+    const tooltipTop = parseFloat(tooltipEl.style.top);
+    const tooltipBottom = tooltipTop + tooltipRect.height;
+
+    if (tooltipBottom <= taskTop + 5) {
+      tooltipEl.style.setProperty('--arrow-position', 'bottom');
+      tooltipEl.style.setProperty(
+        '--arrow-offset',
+        `${taskCenterX - parseFloat(tooltipEl.style.left)}px`
+      );
+    } else if (tooltipTop >= taskBottom - 5) {
+      tooltipEl.style.setProperty('--arrow-position', 'top');
+      tooltipEl.style.setProperty(
+        '--arrow-offset',
+        `${taskCenterX - parseFloat(tooltipEl.style.left)}px`
+      );
+    }
   }
 
   private setupKeyboardNavigation(): void {
@@ -1722,13 +1755,41 @@ export class BpmnViewerCustomComponent
   loadDiagram(): void {
     if (!this.selectedDiagram) return;
 
+    const previousStates = {
+      showTimeTags: this.showTimeTags,
+      showInstanceTags: this.showInstanceTags,
+      showIncidentTags: this.showIncidentTags,
+      showHeatmap: this.showHeatmap,
+    };
+
+    this.showTimeTags = false;
+    this.showInstanceTags = false;
+    this.showIncidentTags = false;
+    this.showHeatmap = false;
+
+    this.updateTagsVisibility();
+    this.updateHeatmapVisibility();
+
     this.http
       .get(`/bpmn/${this.selectedDiagram}`, { responseType: 'text' })
       .subscribe({
         next: (xml) => {
-          this.bpmnViewer.importXML(xml).catch((err: any) => {
-            this.error = `Error al importar el diagrama: ${err.message}`;
-          });
+          this.bpmnViewer
+            .importXML(xml)
+            .catch((err: any) => {
+              this.error = `Error al importar el diagrama: ${err.message}`;
+            })
+            .finally(() => {
+              setTimeout(() => {
+                this.showTimeTags = previousStates.showTimeTags;
+                this.showInstanceTags = previousStates.showInstanceTags;
+                this.showIncidentTags = previousStates.showIncidentTags;
+                this.showHeatmap = previousStates.showHeatmap;
+
+                this.updateTagsVisibility();
+                this.updateHeatmapVisibility();
+              }, 500);
+            });
         },
         error: (err) => {
           this.error = `Error al cargar el archivo ${this.selectedDiagram}: ${err.message}`;
@@ -1784,6 +1845,7 @@ export class BpmnViewerCustomComponent
           'hiring.bpmn',
           'hotelBooking.bpmn',
           'travels.bpmn',
+          'hiring-old.bpmn',
         ];
         this.selectedDiagram = this.availableDiagrams[0];
         this.loadDiagram();

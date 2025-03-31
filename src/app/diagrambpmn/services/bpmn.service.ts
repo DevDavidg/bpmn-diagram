@@ -20,6 +20,7 @@ export class BpmnService {
           'hiring.bpmn',
           'hotelBooking.bpmn',
           'travels.bpmn',
+          'hiring-old.bpmn',
         ];
         console.warn('Usando lista de diagramas de respaldo para desarrollo');
         return of(defaultBpmnFiles);
