@@ -890,8 +890,8 @@ kcontext.setVariable("it_approval", false);</bpmn2:script>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="edge_shape__5B5C8F18-B18E-4F38-BEB2-BA1AF8025836_to_shape__3D3240D6-1A0B-41AF-8122-29DA62B6F0AE" bpmnElement="_6A731794-34D3-4CCA-9607-D469D612595F">
-        <di:waypoint x="1813" y="134.50000000000006" />
-        <di:waypoint x="1998" y="134.50000000000006" />
+        <di:waypoint x="1890" y="135" />
+        <di:waypoint x="1970" y="135" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="edge_shape__EC746C99-E104-4015-83D9-03AA6DC69B5A_to_shape__0462D6E9-7099-4F55-B570-4878505FF34D" bpmnElement="_62DEE29C-CB7E-4532-A2A5-770BE5B4CDBC">
         <di:waypoint x="1127" y="221" />
@@ -957,7 +957,7 @@ kcontext.setVariable("it_approval", false);</bpmn2:script>
         <di:waypoint x="486" y="357" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="edge_shape__8962C15F-55EC-46F7-B926-5D5A1FD8D35E_to_shape__A10FCA8A-D387-49BF-B675-596B9B78ABE6" bpmnElement="_5B44E9B7-A751-47D2-9110-1FA9556BC714">
-        <di:waypoint x="2094" y="271" />
+        <di:waypoint x="2171" y="271" />
         <di:waypoint x="2225" y="271" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="edge_shape__92DE8566-6BCB-4156-8501-B89B6E3720D8_to_shape__8962C15F-55EC-46F7-B926-5D5A1FD8D35E" bpmnElement="_5B767618-0FC5-4D45-899F-59A4F26D1EE1">
@@ -986,9 +986,9 @@ kcontext.setVariable("it_approval", false);</bpmn2:script>
         <di:waypoint x="1144" y="356" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="edge_shape__357AB6EA-99F6-4474-9328-449C86EF5176_to_shape__5B5C8F18-B18E-4F38-BEB2-BA1AF8025836" bpmnElement="_78B6783F-A4AC-4CF6-8B12-E22796C92214">
-        <di:waypoint x="1658" y="304.50000000000006" />
-        <di:waypoint x="1657.555552323707" y="134.4188510359772" />
-        <di:waypoint x="1813" y="134.50000000000006" />
+        <di:waypoint x="1658" y="277" />
+        <di:waypoint x="1657.555552323707" y="135" />
+        <di:waypoint x="1736" y="135" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="edge_shape__116F3C54-A10E-4952-9E08-1CACE74CED0B_to_shape__834B21EF-9229-44F8-A5DB-D96EBB39A347" bpmnElement="_7B41F971-C74D-4036-8A5E-EFF81C37986A">
         <di:waypoint x="1636" y="435" />
